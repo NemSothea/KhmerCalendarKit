@@ -1,19 +1,58 @@
 # KhmerCalendarKit
 
-A production-ready Swift Package providing a complete Khmer calendar system: Gregorian date formatting in Khmer script, Khmer lunisolar (Chhankitek) calendar conversion, and reusable SwiftUI components.
+![Swift](https://img.shields.io/badge/Swift-5.9-orange?logo=swift)
+![iOS](https://img.shields.io/badge/iOS-14%2B-blue?logo=apple)
+![macOS](https://img.shields.io/badge/macOS-11%2B-blue?logo=apple)
+![SPM](https://img.shields.io/badge/Swift_Package_Manager-compatible-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
+A Swift Package for working with the Khmer calendar system — Gregorian date formatting in Khmer script, Khmer lunisolar (Chhankitek) calendar conversion, and ready-to-use SwiftUI components with runtime Khmer/English locale switching.
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Gregorian Formatting](#gregorian-formatting)
+- [Lunar Calendar (Chhankitek)](#lunar-calendar-chhankitek)
+- [SwiftUI Components](#swiftui-components)
+- [Architecture](#architecture)
+- [Demo App](#demo-app)
+- [Extending the Package](#extending-the-package)
+- [Comparison with Apple's DateFormatter](#comparison-with-apples-dateformatter)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
 ## Features
 
-| Layer | What it does |
+| Component | Description |
 |---|---|
-| **KhmerNumeralConverter** | Convert Arabic `0-9` ↔ Khmer `០-៩` digits |
-| **KhmerCalendarSymbols** | Khmer month and weekday names |
-| **KhmerDateFormatter** | `Date` → `"ថ្ងៃច័ន្ទ ទី១ ខែមករា ឆ្នាំ២០២៦"` |
-| **KhmerLunarCalendar** | Gregorian → Khmer lunisolar date (Chhankitek) |
-| **KhmerCalendarView** | SwiftUI month-grid picker |
-| **KhmerDatePickerView** | Combined date + time picker |
+| **KhmerNumeralConverter** | Convert Arabic `0–9` ↔ Khmer `០–៩` digits |
+| **KhmerCalendarSymbols** | Khmer names for all 12 months and 7 weekdays |
+| **KhmerDateFormatter** | `Date` → `"ថ្ងៃច័ន្ទ ទី១ ខែមករា ឆ្នាំ២០២៦"` with CE/BE era support |
+| **KhmerLunarCalendar** | Gregorian → Khmer lunisolar (Chhankitek) date conversion |
+| **KhmerCalendarView** | SwiftUI month-grid calendar picker |
+| **KhmerDatePickerView** | Combined date + time picker with scrollable wheels |
+
+---
+
+## Requirements
+
+| Requirement | Minimum |
+|---|---|
+| Swift | 5.9 |
+| iOS | 14.0 |
+| macOS | 11.0 |
+| tvOS | 14.0 |
+| watchOS | 7.0 |
+| Xcode | 15.0 |
+
+> The Foundation and logic layers (`KhmerDateFormatter`, `KhmerLunarCalendar`, etc.) have no SwiftUI dependency and are compatible with iOS 13+ when used without the view components.
 
 ---
 
@@ -21,13 +60,19 @@ A production-ready Swift Package providing a complete Khmer calendar system: Gre
 
 ### Xcode
 
-**File → Add Package Dependencies** → paste the repository URL → select **Up to Next Major Version**.
+1. Open your project in Xcode.
+2. Go to **File → Add Package Dependencies…**
+3. Enter the repository URL:
+   ```
+   https://github.com/NemSothea/KhmerCalendarKit
+   ```
+4. Select **Up to Next Major Version** from `1.0.0`.
 
 ### Package.swift
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-org/KhmerCalendarKit", from: "1.0.0")
+    .package(url: "https://github.com/NemSothea/KhmerCalendarKit", from: "1.0.0")
 ],
 targets: [
     .target(name: "MyApp", dependencies: ["KhmerCalendarKit"])
@@ -41,18 +86,23 @@ targets: [
 ```swift
 import KhmerCalendarKit
 
-// Gregorian date in Khmer
+// Gregorian date in Khmer script
 let text = Date().khmerString()
 // → "ថ្ងៃច័ន្ទ ទី១ ខែមករា ឆ្នាំ២០២៦"
 
-// Lunar date
-let lunar = Date().toKhmerLunar()
-print(lunar.lunarDayString)            // "១កើត"
-print(lunar.lunarMonth.khmerName)      // "ចេត្រ"
-print(lunar.zodiacYear.khmerName)      // "មមីរ"
-print(lunar.buddhistYear)              // 2569
+// Buddhist Era year
+let be = Date().khmerString(format: .buddhist)
+// → "ថ្ងៃច័ន្ទ ទី១ ខែមករា ឆ្នាំ២៥៦៩"
 
-// SwiftUI picker
+// Khmer lunisolar date
+let lunar = Date().toKhmerLunar()
+print(lunar.lunarDayString)          // "១កើត"
+print(lunar.lunarMonth.khmerName)    // "ចេត្រ"
+print(lunar.zodiacYear.khmerName)    // "មមីរ"
+print(lunar.buddhistYear)            // 2569
+print(lunar.khmerDescription())      // "ថ្ងៃ ១កើត ខែចេត្រ ឆ្នាំមមីរ ២៥៦៩"
+
+// SwiftUI date picker
 @State var date = Date()
 KhmerDatePickerView(selection: $date)
 ```
@@ -64,17 +114,17 @@ KhmerDatePickerView(selection: $date)
 ### KhmerDateFormatter
 
 ```swift
-// Static convenience
+// One-off convenience
 let s = KhmerDateFormatter.string(from: date)
 // → "ថ្ងៃច័ន្ទ ទី១ ខែមករា ឆ្នាំ២០២៦"
 
-// Buddhist Era year (+543)
+// Buddhist Era
 let be = KhmerDateFormatter.string(from: date, format: .buddhist)
 // → "ថ្ងៃច័ន្ទ ទី១ ខែមករា ឆ្នាំ២៥៦៩"
 
-// Reusable instance
+// Reusable instance — preferred when formatting many dates
 let formatter = KhmerDateFormatter(format: .dateOnly)
-dates.map { formatter.string(from: $0) }
+let results = dates.map { formatter.string(from: $0) }
 ```
 
 ### Format presets
@@ -101,7 +151,7 @@ var format = KhmerDateFormat(
 
 ```swift
 var labels = KhmerDateLabels.default
-labels.dayPrefix = ""          // drop "ទី" for compact cells
+labels.dayPrefix = ""          // remove "ទី" prefix for compact cells
 format.labels = labels
 // → "ថ្ងៃច័ន្ទ ១ ខែមករា ឆ្នាំ២០២៦"
 ```
@@ -115,12 +165,12 @@ format.labels = labels
 ```swift
 let lunar = KhmerLunarCalendar.lunarDate(from: Date())
 
-lunar.lunarDay           // 1–15
+lunar.lunarDay           // Day within the half-month: 1–15
 lunar.phase              // .kert (waxing) or .roch (waning)
-lunar.lunarMonth         // KhmerLunarMonth enum
-lunar.buddhistYear       // e.g. 2569
-lunar.zodiacYear         // KhmerZodiacYear enum
-lunar.isLeapMonth        // true in intercalary years (simplified engine: always false)
+lunar.lunarMonth         // KhmerLunarMonth enum value
+lunar.buddhistYear       // Buddhist Era year, e.g. 2569
+lunar.zodiacYear         // KhmerZodiacYear enum value
+lunar.isLeapMonth        // true in intercalary months
 
 lunar.lunarDayString     // "១កើត" or "១រោច"
 lunar.khmerDescription() // "ថ្ងៃ ១កើត ខែចេត្រ ឆ្នាំមមីរ ២៥៦៩"
@@ -130,42 +180,44 @@ lunar.khmerDescription() // "ថ្ងៃ ១កើត ខែចេត្រ ឆ
 
 ```swift
 let lunar = date.toKhmerLunar()
+
+// Explicit time zone (recommended for devices outside Cambodia)
 let lunar = date.toKhmerLunar(timeZone: TimeZone(identifier: "Asia/Phnom_Penh")!)
 ```
 
 ### Lunar months (ចន្ទគតិ)
 
-| Index | Khmer | Approx. Gregorian |
-|---|---|---|
-| 0 | ចេត្រ | April |
-| 1 | វិសាខ | May |
-| 2 | ជេស្ឋ | June |
-| 3 | អាសាឍ | July |
-| 4 | ស្រាពណ៍ | August |
-| 5 | ភទ្របទ | September |
-| 6 | អស្សុជ | October |
-| 7 | កត្តិក | November |
-| 8 | មិគសិរ | December |
-| 9 | បុស្ស | January |
-| 10 | មាឃ | February |
-| 11 | ផល្គុន | March |
+| # | Khmer | Romanised | Approx. Gregorian |
+|---|---|---|---|
+| 1 | ចេត្រ | Chetr | April |
+| 2 | វិសាខ | Visak | May |
+| 3 | ជេស្ឋ | Cheth | June |
+| 4 | អាសាឍ | Asath | July |
+| 5 | ស្រាពណ៍ | Srap | August |
+| 6 | ភទ្របទ | Phetra | September |
+| 7 | អស្សុជ | Assuj | October |
+| 8 | កត្តិក | Kattek | November |
+| 9 | មិគសិរ | Migsir | December |
+| 10 | បុស្ស | Boss | January |
+| 11 | មាឃ | Meakh | February |
+| 12 | ផល្គុន | Phalgun | March |
 
-### Zodiac years
+### Zodiac years (របស់១២)
 
-| BE mod 12 | Khmer | English |
+| Khmer | English | BE cycle (anchor: 2563 = ជូត) |
 |---|---|---|
-| 0 (2563 BE) | ជូត | Rat |
-| 1 | ឆ្លូវ | Ox |
-| 2 | ខាល | Tiger |
-| 3 | ថោះ | Rabbit |
-| 4 | រោង | Dragon |
-| 5 | មសាញ់ | Snake |
-| 6 | មមីរ | Horse |
-| 7 | មមែ | Goat |
-| 8 | វក | Monkey |
-| 9 | រកា | Rooster |
-| 10 | ចូវ | Dog |
-| 11 | កុរ | Pig |
+| ជូត | Rat | BE mod 12 = 0 |
+| ឆ្លូវ | Ox | 1 |
+| ខាល | Tiger | 2 |
+| ថោះ | Rabbit | 3 |
+| រោង | Dragon | 4 |
+| មសាញ់ | Snake | 5 |
+| មមីរ | Horse | 6 |
+| មមែ | Goat | 7 |
+| វក | Monkey | 8 |
+| រកា | Rooster | 9 |
+| ចូវ | Dog | 10 |
+| កុរ | Pig | 11 |
 
 ---
 
@@ -188,7 +240,7 @@ KhmerCalendarView(
 
 ### KhmerDatePickerView
 
-Combines the calendar grid with time wheels.
+Combines the calendar grid with scrollable time wheels.
 
 ```swift
 // Date only (default)
@@ -197,7 +249,7 @@ KhmerDatePickerView(selection: $date)
 // Time only
 KhmerDatePickerView(selection: $date, mode: .time, locale: .khmer)
 
-// Date + time with seconds
+// Date and time with seconds wheel
 KhmerDatePickerView(
     selection: $date,
     mode: .dateAndTime,
@@ -206,7 +258,9 @@ KhmerDatePickerView(
 )
 ```
 
-### Locale switching at runtime
+### Runtime locale switching
+
+Both views re-render instantly when the locale binding changes.
 
 ```swift
 @State private var locale: KhmerLocale = .khmer
@@ -220,6 +274,7 @@ VStack {
     .pickerStyle(.segmented)
 
     KhmerCalendarView(selection: $date, locale: locale)
+        .id(locale)   // ensures ViewModel is recreated on change
 }
 ```
 
@@ -230,95 +285,114 @@ VStack {
 ```
 KhmerCalendarKit
 ├── Localization
-│   └── KhmerLocale          ← .khmer / .english runtime switch
+│   └── KhmerLocale              — .khmer / .english runtime switch
 ├── Numerals
-│   └── KhmerNumeralConverter ← Arabic ↔ Khmer digit conversion (O(n), Unicode-safe)
+│   └── KhmerNumeralConverter    — Arabic ↔ Khmer digit conversion (O(n))
 ├── Symbols
-│   └── KhmerCalendarSymbols  ← month + weekday name tables
+│   └── KhmerCalendarSymbols     — month and weekday name tables
 ├── Formatter
-│   ├── KhmerDateFormat       ← segment toggles + era + separator
-│   ├── KhmerDateLabels       ← ថ្ងៃ / ទី / ខែ / ឆ្នាំ prefixes
-│   ├── KhmerDateFormatter    ← Date → Khmer string (value type, reusable)
-│   └── KhmerEra              ← .christian / .buddhist (+543)
+│   ├── KhmerDateFormat          — segment toggles, era, separator
+│   ├── KhmerDateLabels          — ថ្ងៃ / ទី / ខែ / ឆ្នាំ prefix strings
+│   ├── KhmerDateFormatter       — Date → Khmer string (value type, reusable)
+│   └── KhmerEra                 — .christian (CE) / .buddhist (BE, +543)
 ├── Lunar
-│   ├── KhmerLunarCalendar    ← Gregorian → Chhankitek conversion engine
-│   ├── KhmerLunarDate        ← result model (day, phase, month, BE year, zodiac)
-│   ├── KhmerLunarMonth       ← ចេត្រ … ផល្គុន enum
-│   ├── KhmerLunarPhase       ← .kert / .roch
-│   └── KhmerZodiacYear       ← 12-animal cycle
+│   ├── KhmerLunarCalendar       — Gregorian → Chhankitek conversion engine
+│   ├── KhmerLunarDate           — day, phase, month, Buddhist Era year, zodiac
+│   ├── KhmerLunarMonth          — ចេត្រ … ផល្គុន (12-month enum)
+│   ├── KhmerLunarPhase          — .kert (waxing) / .roch (waning)
+│   └── KhmerZodiacYear          — 12-animal cycle
 ├── ViewModels
-│   └── KhmerCalendarViewModel ← ObservableObject (days grid, navigation, labels)
+│   └── KhmerCalendarViewModel   — ObservableObject: grid, navigation, labels
 ├── Views
-│   ├── KhmerCalendarView     ← month grid (HStack/VStack, iOS 14+)
-│   └── KhmerDatePickerView   ← date + time picker
+│   ├── KhmerCalendarView        — month grid (iOS 14+)
+│   └── KhmerDatePickerView      — date + time picker
 └── Extensions
-    └── Date+KhmerCalendarKit ← khmerString() / toKhmerLunar()
+    └── Date+KhmerCalendarKit    — khmerString() / toKhmerLunar()
 ```
 
-Data flows one way: `KhmerLocale` → `KhmerCalendarViewModel` → Views.
-Views never compute calendar math directly.
+Data flows in one direction: `KhmerLocale` → `KhmerCalendarViewModel` → Views. Views never compute calendar logic directly.
+
+**Performance notes**
+
+- `KhmerNumeralConverter` is O(n) per string and performs no heap allocations.
+- `KhmerDateFormatter` is a value type — construct once and reuse for batches of dates.
+- `KhmerLunarCalendar.lunarDate(from:)` is a pure O(1) function; no caching is needed.
+
+---
+
+## Demo App
+
+A fully functional demo app is included at [`KhmerCalendarKitDemo/`](KhmerCalendarKitDemo/). Open the Xcode project to run it on the iOS Simulator or a device.
+
+| Screen | Demonstrates |
+|---|---|
+| **Home** | Today's date in CE, BE, and Chhankitek formats |
+| **Formatter** | Live output with segment toggles and era picker |
+| **Calendar** | `KhmerCalendarView` with Khmer / English locale toggle |
+| **Date Picker** | `KhmerDatePickerView` in Date, Time, and Date & Time modes |
+| **Lunar** | Chhankitek detail card, date lookup, interactive 12-animal zodiac grid |
+| **Settings** | Shared locale, era, and first-weekday preferences; numeral reference |
 
 ---
 
 ## Extending the Package
 
-### Add a new formatter style
+### Add a formatter preset
 
-1. Add a case to `KhmerDateFormat` (e.g. `static let compact = KhmerDateFormat(includesWeekday: false, separator: "/")`).
-2. Optionally adjust `KhmerDateLabels` for that style.
+1. Add a static property to `KhmerDateFormat`:
+   ```swift
+   static let compact = KhmerDateFormat(includesWeekday: false, separator: "/")
+   ```
+2. Adjust `KhmerDateLabels` if needed.
 3. Add a test in `KhmerDateFormatterTests`.
 
-### Add a new locale
+### Add a locale
 
-1. Add a case to `KhmerLocale` with a `foundationLocale` and `displayName`.
-2. Add switch branches in `KhmerCalendarSymbols`, `KhmerLunarMonth.englishName`, etc.
+1. Add a case to `KhmerLocale` with `foundationLocale` and `displayName`.
+2. Add branches in `KhmerCalendarSymbols`, `KhmerLunarMonth.englishName`, etc.
 3. Update `KhmerCalendarViewModel.weekdayHeaders` and `formattedHeader`.
 
 ### Custom theme
 
-Wrap `KhmerCalendarView` in a `ViewModifier` or subclass the background/accent colors via SwiftUI environment values:
+Apply SwiftUI environment modifiers directly to any view:
 
 ```swift
 KhmerCalendarView(selection: $date)
-    .accentColor(.red)
+    .accentColor(.indigo)
     .foregroundColor(.primary)
+    .background(Color(.secondarySystemBackground))
 ```
 
 ---
 
-## Limitations vs. Apple's DateFormatter
+## Comparison with Apple's DateFormatter
 
-| Capability | KhmerCalendarKit | Apple DateFormatter |
+| Capability | KhmerCalendarKit | Apple `DateFormatter` |
 |---|---|---|
-| Khmer script month names | Full support | None |
-| Khmer numerals (០-៩) | Full support | None |
-| Chhankitek lunar date | Synodic approximation | None |
-| Zodiac year | Yes | None |
-| Buddhist Era | Yes | Yes (via `.buddhist` calendar) |
-| Sub-second precision | No | Yes |
-| Precise leap-month detection | No (requires full ephemeris) | N/A |
-| Locale-aware formatting | Manual | Automatic |
-
-### Performance notes
-
-- `KhmerNumeralConverter` is O(n) and allocation-free (operates on `Character`).
-- `KhmerDateFormatter` is a value type; construct once and reuse across many dates.
-- `KhmerLunarCalendar.lunarDate` is a pure function with no caching needed — all operations are O(1) floating-point arithmetic.
-- `KhmerCalendarViewModel` recomputes `daysInDisplayedMonth` on every SwiftUI render pass. For performance-sensitive lists, extract only the values you need from the view model.
+| Khmer script month and weekday names | ✅ Full support | ❌ Not available |
+| Khmer numerals (០–៩) | ✅ Full support | ❌ Not available |
+| Chhankitek lunisolar date | ✅ Synodic approximation | ❌ Not available |
+| 12-year zodiac cycle | ✅ | ❌ |
+| Buddhist Era | ✅ | ✅ (via `.buddhist` `Calendar`) |
+| Precise astronomical leap-month | ❌ Requires full ephemeris | N/A |
+| Sub-second precision | ❌ | ✅ |
+| Automatic locale-aware formatting | ❌ Manual | ✅ |
 
 ---
 
-## iOS Version Rationale
+## Contributing
 
-The package targets **iOS 14+** (and macOS 11+). iOS 14 is required for:
-- `Image(systemName:)` navigation chevrons (macOS 11+ on Mac)
-- `.onChange(of:)` binding synchronisation
-- `.font(.title2)` in the time picker separator
+Contributions, bug reports, and feature requests are welcome. Please open an issue or submit a pull request on [GitHub](https://github.com/NemSothea/KhmerCalendarKit).
 
-The Foundation + logic layer has no iOS 14 dependencies and could be used from iOS 13 by importing only those types and omitting the SwiftUI views.
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feature/my-improvement`.
+3. Commit your changes with a descriptive message.
+4. Push the branch and open a pull request.
+
+Please ensure all existing tests pass (`swift test`) and add tests for any new behaviour.
 
 ---
 
 ## License
 
-MIT — see LICENSE file.
+KhmerCalendarKit is released under the **MIT License**. See [LICENSE](LICENSE) for details.
