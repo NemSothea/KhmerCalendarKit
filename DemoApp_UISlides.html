@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KhmerCalendarKit — Demo App UI Slides</title>
+<style>
+  /* ─── Reset & Globals ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    overflow-x: hidden;
+  }
+
+  /* ─── Slide wrapper ───────────────────────────────────────── */
+  .slide-show {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 20px;
+  }
+
+  .slide {
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .slide-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #a78bfa;
+    margin-bottom: 10px;
+  }
+
+  .slide-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #f9fafb;
+    margin-bottom: 20px;
+  }
+
+  /* ─── iPhone shell ────────────────────────────────────────── */
+  .phone {
+    width: 375px;
+    min-height: 812px;
+    background: #ffffff;
+    border-radius: 44px;
+    box-shadow:
+      0 0 0 10px #1c1c1e,
+      0 0 0 12px #3a3a3c,
+      0 30px 80px rgba(0,0,0,.7);
+    overflow: hidden;
+    position: relative;
+    color: #1c1c1e;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phone.dark {
+    background: #1c1c1e;
+    color: #f2f2f7;
+  }
+
+  /* notch */
+  .notch {
+    width: 130px;
+    height: 30px;
+    background: #1c1c1e;
+    border-radius: 0 0 20px 20px;
+    align-self: center;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+  .phone.dark .notch { background: #000; }
+
+  /* status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 24px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* ─── Navigation bar ──────────────────────────────────────── */
+  .nav-bar {
+    padding: 4px 16px 12px;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    flex-shrink: 0;
+  }
+  .phone.dark .nav-bar { border-color: rgba(255,255,255,.08); }
+
+  .nav-title {
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .nav-large-title {
+    font-size: 28px;
+    font-weight: 700;
+    padding: 4px 16px 8px;
+  }
+
+  /* ─── Screen content ──────────────────────────────────────── */
+  .screen-content {
+    flex: 1;
+    padding: 0 16px 24px;
+    overflow: hidden;
+  }
+
+  /* ─── Cards ───────────────────────────────────────────────── */
+  .card {
+    background: #f2f2f7;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .phone.dark .card { background: #2c2c2e; }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8e8e93;
+    margin-bottom: 4px;
+  }
+
+  .card-value {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .card-value.khmer {
+    font-size: 18px;
+    font-weight: 600;
+    color: #5856d6;
+  }
+  .phone.dark .card-value.khmer { color: #a78bfa; }
+
+  /* ─── Tab bar ─────────────────────────────────────────────── */
+  .tab-bar {
+    display: flex;
+    border-top: 1px solid rgba(0,0,0,.12);
+    padding: 8px 0 20px;
+    flex-shrink: 0;
+  }
+  .phone.dark .tab-bar { border-color: rgba(255,255,255,.12); }
+
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+  }
+
+  .tab-icon { font-size: 22px; }
+  .tab-name { font-size: 10px; color: #8e8e93; }
+  .tab-item.active .tab-name { color: #007aff; }
+  .tab-item.active .tab-icon { filter: sepia(1) saturate(5) hue-rotate(200deg); }
+
+  /* ─── Calendar grid ───────────────────────────────────────── */
+  .cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0 8px;
+  }
+
+  .cal-month-title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .cal-nav-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f2f2f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #007aff;
+    border: none;
+    cursor: pointer;
+  }
+  .phone.dark .cal-nav-btn { background: #3a3a3c; }
+
+  .weekday-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #8e8e93;
+    margin-bottom: 4px;
+  }
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .day-cell.today { color: #007aff; font-weight: 700; }
+  .day-cell.selected {
+    background: #007aff;
+    color: #fff;
+    font-weight: 700;
+  }
+  .day-cell.empty { visibility: hidden; }
+  .day-cell.lunar-info {
+    position: relative;
+    flex-direction: column;
+    height: 44px;
+    border-radius: 8px;
+  }
+  .day-cell .lunar-sub {
+    font-size: 8px;
+    color: #8e8e93;
+    margin-top: -2px;
+  }
+  .day-cell.selected .lunar-sub { color: rgba(255,255,255,.75); }
+
+  /* ─── Picker wheel mock ───────────────────────────────────── */
+  .wheel-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0;
+    height: 160px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 8px;
+  }
+
+  .wheel-container::before,
+  .wheel-container::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    height: 38px;
+    border-top: 1px solid rgba(0,0,0,.15);
+    border-bottom: 1px solid rgba(0,0,0,.15);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .wheel-container::before { top: 50%; transform: translate(-50%, -50%); }
+  .phone.dark .wheel-container::before,
+  .phone.dark .wheel-container::after { border-color: rgba(255,255,255,.2); }
+
+  .wheel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .wheel-label {
+    font-size: 11px;
+    color: #8e8e93;
+    margin-bottom: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  .wheel-items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .wheel-item {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    width: 64px;
+    opacity: .35;
+  }
+
+  .wheel-item.selected {
+    opacity: 1;
+    font-weight: 600;
+  }
+  .wheel-item.near { opacity: .65; }
+
+  .wheel-sep {
+    font-size: 22px;
+    font-weight: 700;
+    padding-top: 52px;
+    padding-inline: 4px;
+  }
+
+  /* ─── Segment control ─────────────────────────────────────── */
+  .seg-control {
+    display: flex;
+    background: #f2f2f7;
+    border-radius: 9px;
+    padding: 2px;
+    margin-bottom: 16px;
+  }
+  .phone.dark .seg-control { background: #2c2c2e; }
+
+  .seg-item {
+    flex: 1;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 7px;
+    color: #8e8e93;
+  }
+  .seg-item.active {
+    background: #fff;
+    color: #1c1c1e;
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    font-weight: 600;
+  }
+  .phone.dark .seg-item.active { background: #3a3a3c; color: #f2f2f7; }
+
+  /* ─── Toggle row ──────────────────────────────────────────── */
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    font-size: 15px;
+  }
+  .phone.dark .toggle-row { border-color: rgba(255,255,255,.06); }
+
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle {
+    width: 51px;
+    height: 31px;
+    border-radius: 16px;
+    background: #34c759;
+    position: relative;
+  }
+  .toggle.off { background: #d1d1d6; }
+
+  .toggle::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+  .toggle.off::after { right: auto; left: 2px; }
+
+  /* ─── Badge / pill ────────────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge.blue  { background: #e3f2fd; color: #1976d2; }
+  .badge.purple{ background: #f3e5f5; color: #7b1fa2; }
+  .badge.green { background: #e8f5e9; color: #388e3c; }
+  .badge.orange{ background: #fff3e0; color: #e65100; }
+  .phone.dark .badge.blue   { background: #1a3a5c; color: #90caf9; }
+  .phone.dark .badge.purple { background: #3b1d4a; color: #ce93d8; }
+  .phone.dark .badge.green  { background: #1b3a21; color: #a5d6a7; }
+  .phone.dark .badge.orange { background: #3e2000; color: #ffcc80; }
+
+  /* ─── List row ────────────────────────────────────────────── */
+  .list-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    font-size: 15px;
+    gap: 8px;
+  }
+  .phone.dark .list-row { border-color: rgba(255,255,255,.06); }
+  .list-row:last-child { border-bottom: none; }
+
+  .list-row-left { display: flex; flex-direction: column; gap: 2px; }
+  .list-row-sub  { font-size: 12px; color: #8e8e93; }
+  .list-row-right{ color: #007aff; font-size: 15px; }
+
+  /* ─── Section header ──────────────────────────────────────── */
+  .section-header {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #8e8e93;
+    padding: 16px 0 6px;
+  }
+
+  /* ─── Zodiac grid ─────────────────────────────────────────── */
+  .zodiac-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .zodiac-cell {
+    background: #f2f2f7;
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 11px;
+  }
+  .phone.dark .zodiac-cell { background: #2c2c2e; }
+
+  .zodiac-emoji { font-size: 22px; display: block; margin-bottom: 4px; }
+  .zodiac-name  { font-size: 11px; color: #8e8e93; }
+  .zodiac-cell.active {
+    background: #5856d6;
+    color: #fff;
+  }
+  .zodiac-cell.active .zodiac-name { color: rgba(255,255,255,.75); }
+
+  /* ─── Two-phone layout ────────────────────────────────────── */
+  .two-phones {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .two-phones .phone { width: 320px; min-height: 690px; }
+
+  /* ─── Slide layout helpers ────────────────────────────────── */
+  .slide-center { display: flex; flex-direction: column; align-items: center; }
+  .slide-note {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #a78bfa;
+    text-align: center;
+    max-width: 560px;
+  }
+
+  /* ─── Big hero slide ──────────────────────────────────────── */
+  .hero-slide {
+    background: linear-gradient(135deg, #5856d6 0%, #007aff 50%, #34c759 100%);
+    border-radius: 24px;
+    padding: 60px 40px;
+    text-align: center;
+  }
+
+  .hero-slide h1 { font-size: 40px; font-weight: 800; color: #fff; }
+  .hero-slide p  { font-size: 18px; color: rgba(255,255,255,.85); margin-top: 12px; }
+  .hero-version  {
+    display: inline-block;
+    background: rgba(255,255,255,.2);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 16px;
+  }
+
+  /* feature bullets */
+  .feature-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 28px;
+  }
+  .feature-pill {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 14px;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* ─── Arch diagram ────────────────────────────────────────── */
+  .arch-box {
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 4px;
+  }
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  /* ─── Connector arrows ────────────────────────────────────── */
+  .arrow-down {
+    text-align: center;
+    font-size: 20px;
+    color: #a78bfa;
+    margin: 4px 0;
+  }
+
+  /* scrollable slides preview bar */
+  .slides-nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    background: rgba(0,0,0,.6);
+    backdrop-filter: blur(12px);
+    border-radius: 30px;
+    padding: 8px 16px;
+    z-index: 100;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.3);
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .dot.active { background: #a78bfa; }
+</style>
+</head>
+<body>
+
+<div class="slide-show">
+
+  <!-- ── SLIDE 0 : Hero ────────────────────────────────────────── -->
+  <div class="slide">
+    <div class="hero-slide">
+      <h1>🇰🇭 KhmerCalendarKit</h1>
+      <p>Khmer calendar utilities for Swift — SPM Demo App</p>
+      <div class="hero-version">v 1.0.0</div>
+      <div class="feature-list">
+        <span class="feature-pill">🔢 Khmer Numerals</span>
+        <span class="feature-pill">📅 Gregorian Formatter</span>
+        <span class="feature-pill">🌙 Lunar Calendar</span>
+        <span class="feature-pill">🐉 Zodiac Year</span>
+        <span class="feature-pill">🗓 Calendar View</span>
+        <span class="feature-pill">⏰ Date Picker</span>
+        <span class="feature-pill">🌐 KH / EN Locale</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 1 : Tab 1 — Home / Overview ─────────────────────── -->
+  <div class="slide">
+    <div class="slide-label">Screen 1 of 6</div>
+    <div class="slide-title">Home — Package Overview</div>
+    <div class="slide-center">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●●</span><span>100%</span></div>
+        <div class="nav-large-title">KhmerCalendarKit</div>
+        <div class="screen-content">
+
+          <div class="card">
+            <div class="card-label">Version</div>
+            <div class="card-value">1.0.0  &nbsp;<span class="badge blue">Stable</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-label">Today (Gregorian)</div>
+            <div class="card-value khmer">ថ្ងៃព្រហស្បតិ៍ ទី១ ខែឧសភា ឆ្នាំ២០២៦</div>
+          </div>
+
+          <div class="card">
+            <div class="card-label">Today (Buddhist Era)</div>
+            <div class="card-value khmer">ថ្ងៃព្រហស្បតិ៍ ទី១ ខែឧសភា ឆ្នាំ២៥៦៩</div>
+          </div>
+
+          <div class="card">
+            <div class="card-label">Today (Lunar)</div>
+            <div class="card-value khmer">ថ្ងៃ ៤កើត ខែ​វិសាខ ឆ្នាំ​ម្សាញ់ ២៥៦៩</div>
+          </div>
+
+          <div class="section-header">Features</div>
+          <div class="card" style="padding:0">
+            <div class="list-row" style="padding:11px 12px">
+              <div class="list-row-left">
+                <span>🔢 Numeral Converter</span>
+                <span class="list-row-sub">Arabic ↔ Khmer digits</span>
+              </div>
+              <span class="list-row-right">›</span>
+            </div>
+            <div class="list-row" style="padding:11px 12px">
+              <div class="list-row-left">
+                <span>📅 Date Formatter</span>
+                <span class="list-row-sub">Gregorian + Buddhist Era</span>
+              </div>
+              <span class="list-row-right">›</span>
+            </div>
+            <div class="list-row" style="padding:11px 12px">
+              <div class="list-row-left">
+                <span>🌙 Lunar Calendar</span>
+                <span class="list-row-sub">Chhankitek conversion</span>
+              </div>
+              <span class="list-row-right">›</span>
+            </div>
+            <div class="list-row" style="padding:11px 12px">
+              <div class="list-row-left">
+                <span>🗓 Calendar View</span>
+                <span class="list-row-sub">Month grid + date picker</span>
+              </div>
+              <span class="list-row-right">›</span>
+            </div>
+          </div>
+
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active"><span class="tab-icon">🏠</span><span class="tab-name">Home</span></div>
+          <div class="tab-item"><span class="tab-icon">📅</span><span class="tab-name">Formatter</span></div>
+          <div class="tab-item"><span class="tab-icon">🗓</span><span class="tab-name">Calendar</span></div>
+          <div class="tab-item"><span class="tab-icon">🌙</span><span class="tab-name">Lunar</span></div>
+          <div class="tab-item"><span class="tab-icon">⚙️</span><span class="tab-name">Settings</span></div>
+        </div>
+      </div>
+      <div class="slide-note">Home tab shows today's date in all three formats and quick-access to features.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2 : Tab 2 — Formatter ───────────────────────────── -->
+  <div class="slide">
+    <div class="slide-label">Screen 2 of 6</div>
+    <div class="slide-title">Formatter — KhmerDateFormatter</div>
+    <div class="slide-center">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●●</span><span>100%</span></div>
+        <div class="nav-bar"><div class="nav-title">Date Formatter</div></div>
+        <div class="screen-content">
+
+          <div class="section-header">Pick a Date</div>
+          <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:15px;font-weight:600;">May 1, 2026</span>
+            <span style="color:#007aff;font-size:13px;">Change ›</span>
+          </div>
+
+          <div class="section-header">Format Options</div>
+          <div class="card" style="padding:0">
+            <div class="toggle-row" style="padding:11px 12px">
+              <span>Show Weekday</span>
+              <div class="toggle"></div>
+            </div>
+            <div class="toggle-row" style="padding:11px 12px">
+              <span>Show Day Number</span>
+              <div class="toggle"></div>
+            </div>
+            <div class="toggle-row" style="padding:11px 12px">
+              <span>Show Month</span>
+              <div class="toggle"></div>
+            </div>
+            <div class="toggle-row" style="padding:11px 12px">
+              <span>Show Year</span>
+              <div class="toggle"></div>
+            </div>
+          </div>
+
+          <div class="section-header">Era</div>
+          <div class="seg-control">
+            <div class="seg-item active">Christian (CE)</div>
+            <div class="seg-item">Buddhist (BE)</div>
+          </div>
+
+          <div class="section-header">Output</div>
+          <div class="card">
+            <div class="card-label">Khmer</div>
+            <div class="card-value khmer" style="font-size:16px;">ថ្ងៃព្រហស្បតិ៍ ទី១ ខែឧសភា ឆ្នាំ២០២៦</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Swift Code</div>
+            <div style="font-family:monospace;font-size:12px;color:#5856d6;background:#f0f0ff;border-radius:8px;padding:10px;line-height:1.6;">
+              Date().khmerString(<br/>
+              &nbsp;&nbsp;format: .full,<br/>
+              &nbsp;&nbsp;era: .christian<br/>
+              )
+            </div>
+          </div>
+
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-name">Home</span></div>
+          <div class="tab-item active"><span class="tab-icon">📅</span><span class="tab-name">Formatter</span></div>
+          <div class="tab-item"><span class="tab-icon">🗓</span><span class="tab-name">Calendar</span></div>
+          <div class="tab-item"><span class="tab-icon">🌙</span><span class="tab-name">Lunar</span></div>
+          <div class="tab-item"><span class="tab-icon">⚙️</span><span class="tab-name">Settings</span></div>
+        </div>
+      </div>
+      <div class="slide-note">Formatter tab: toggle individual format segments, switch CE/BE era, see live output + code snippet.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 3 : Tab 3 — Calendar View ───────────────────────── -->
+  <div class="slide">
+    <div class="slide-label">Screen 3 of 6</div>
+    <div class="slide-title">Calendar View — KhmerCalendarView</div>
+    <div class="slide-center">
+      <div class="two-phones">
+
+        <!-- Khmer locale -->
+        <div>
+          <div style="text-align:center;font-size:13px;color:#a78bfa;margin-bottom:10px;font-weight:600;">Locale: Khmer</div>
+          <div class="phone" style="min-height:620px;">
+            <div class="notch"></div>
+            <div class="status-bar"><span>9:41</span><span>●●●</span><span>100%</span></div>
+            <div class="nav-bar"><div class="nav-title">Calendar</div></div>
+            <div class="screen-content">
+              <div class="seg-control">
+                <div class="seg-item active">ភាសាខ្មែរ</div>
+                <div class="seg-item">English</div>
+              </div>
+              <div class="cal-header">
+                <button class="cal-nav-btn">‹</button>
+                <div class="cal-month-title">ឧសភា ២០២៦</div>
+                <button class="cal-nav-btn">›</button>
+              </div>
+              <div class="weekday-row">
+                <div>អា</div><div>ចន្ទ</div><div>អង</div><div>ពុ</div><div>ព្រ</div><div>សុ</div><div>ស</div>
+              </div>
+              <div class="days-grid" style="font-size:13px;">
+                <div class="day-cell empty"></div>
+                <div class="day-cell empty"></div>
+                <div class="day-cell empty"></div>
+                <div class="day-cell empty"></div>
+                <div class="day-cell today selected">១</div>
+                <div class="day-cell">២</div>
+                <div class="day-cell">៣</div>
+                <div class="day-cell">៤</div>
+                <div class="day-cell">៥</div>
+                <div class="day-cell">៦</div>
+                <div class="day-cell">៧</div>
+                <div class="day-cell">៨</div>
+                <div class="day-cell">៩</div>
+                <div class="day-cell">១០</div>
+                <div class="day-cell">១១</div>
+                <div class="day-cell">១២</div>
+                <div class="day-cell">១៣</div>
+                <div class="day-cell">១៤</div>
+                <div class="day-cell">១៥</div>
+                <div class="day-cell">១៦</div>
+                <div class="day-cell">១៧</div>
+                <div class="day-cell">១៨</div>
+                <div class="day-cell">១៩</div>
+                <div class="day-cell">២០</div>
+                <div class="day-cell">២១</div>
+                <div class="day-cell">២២</div>
+                <div class="day-cell">២៣</div>
+                <div class="day-cell">២៤</div>
+                <div class="day-cell">២៥</div>
+                <div class="day-cell">២៦</div>
+                <div class="day-cell">២៧</div>
+                <div class="day-cell">២៨</div>
+                <div class="day-cell">២៩</div>
+                <div class="day-cell">៣០</div>
+                <div class="day-cell">៣១</div>
+              </div>
+              <div class="card" style="margin-top:16px;">
+                <div class="card-label">Selected</div>
+                <div class="card-value khmer" style="font-size:15px;">ថ្ងៃព្រហស្បតិ៍ ទី១ ខែឧសភា</div>
+              </div>
+            </div>
+            <div class="tab-bar">
+              <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-name">Home</span></div>
+              <div class="tab-item"><span class="tab-icon">📅</span><span class="tab-name">Formatter</span></div>
+              <div class="tab-item active"><span class="tab-icon">🗓</span><span class="tab-name">Calendar</span></div>
+              <div class="tab-item"><span class="tab-icon">🌙</span><span class="tab-name">Lunar</span></div>
+              <div class="tab-item"><span class="tab-icon">⚙️</span><span class="tab-name">Settings</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- English locale -->
+        <div>
+          <div style="text-align:center;font-size:13px;color:#a78bfa;margin-bottom:10px;font-weight:600;">Locale: English</div>
+          <div class="phone" style="min-height:620px;">
+            <div class="notch"></div>
+            <div class="status-bar"><span>9:41</span><span>●●●</span><span>100%</span></div>
+            <div class="nav-bar"><div class="nav-title">Calendar</div></div>
+            <div class="screen-content">
+              <div class="seg-control">
+                <div class="seg-item">ភាសាខ្មែរ</div>
+                <div class="seg-item active">English</div>
+              </div>
+              <div class="cal-header">
+                <button class="cal-nav-btn">‹</button>
+                <div class="cal-month-title">May 2026</div>
+                <button class="cal-nav-btn">›</button>
+              </div>
+              <div class="weekday-row">
+                <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+              </div>
+              <div class="days-grid" style="font-size:13px;">
+                <div class="day-cell empty"></div>
+                <div class="day-cell empty"></div>
+                <div class="day-cell empty"></div>
+                <div class="day-cell empty"></div>
+                <div class="day-cell today selected">1</div>
+                <div class="day-cell">2</div>
+                <div class="day-cell">3</div>
+                <div class="day-cell">4</div>
+                <div class="day-cell">5</div>
+                <div class="day-cell">6</div>
+                <div class="day-cell">7</div>
+                <div class="day-cell">8</div>
+                <div class="day-cell">9</div>
+                <div class="day-cell">10</div>
+                <div class="day-cell">11</div>
+                <div class="day-cell">12</div>
+                <div class="day-cell">13</div>
+                <div class="day-cell">14</div>
+                <div class="day-cell">15</div>
+                <div class="day-cell">16</div>
+                <div class="day-cell">17</div>
+                <div class="day-cell">18</div>
+                <div class="day-cell">19</div>
+                <div class="day-cell">20</div>
+                <div class="day-cell">21</div>
+                <div class="day-cell">22</div>
+                <div class="day-cell">23</div>
+                <div class="day-cell">24</div>
+                <div class="day-cell">25</div>
+                <div class="day-cell">26</div>
+                <div class="day-cell">27</div>
+                <div class="day-cell">28</div>
+                <div class="day-cell">29</div>
+                <div class="day-cell">30</div>
+                <div class="day-cell">31</div>
+              </div>
+              <div class="card" style="margin-top:16px;">
+                <div class="card-label">Selected</div>
+                <div class="card-value" style="font-size:15px;">Thursday, May 1</div>
+              </div>
+            </div>
+            <div class="tab-bar">
+              <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-name">Home</span></div>
+              <div class="tab-item"><span class="tab-icon">📅</span><span class="tab-name">Formatter</span></div>
+              <div class="tab-item active"><span class="tab-icon">🗓</span><span class="tab-name">Calendar</span></div>
+              <div class="tab-item"><span class="tab-icon">🌙</span><span class="tab-name">Lunar</span></div>
+              <div class="tab-item"><span class="tab-icon">⚙️</span><span class="tab-name">Settings</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="slide-note">Calendar tab: KhmerCalendarView in Khmer vs English locale — live segment toggle, selected date label below grid.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4 : Date Picker (all modes) ─────────────────────── -->
+  <div class="slide">
+    <div class="slide-label">Screen 4 of 6</div>
+    <div class="slide-title">Date Picker — KhmerDatePickerView</div>
+    <div class="slide-center">
+      <div class="two-phones">
+
+        <!-- .date mode -->
+        <div>
+          <div style="text-align:center;font-size:13px;color:#a78bfa;margin-bottom:10px;font-weight:600;">Mode: .date</div>
+          <div class="phone" style="min-height:640px;">
+            <div class="notch"></div>
+            <div class="status-bar"><span>9:41</span><span>●●●</span><span>100%</span></div>
+            <div class="nav-bar"><div class="nav-title">Date Picker</div></div>
+            <div class="screen-content">
+              <div class="seg-control">
+                <div class="seg-item active">Date</div>
+                <div class="seg-item">Time</div>
+                <div class="seg-item">Both</div>
+              </div>
+              <div class="cal-header">
+                <button class="cal-nav-btn">‹</button>
+                <div class="cal-month-title">ឧសភា ២០២៦</div>
+                <button class="cal-nav-btn">›</button>
+              </div>
+              <div class="weekday-row" style="font-size:11px;">
+                <div>អា</div><div>ចន្ទ</div><div>អង</div><div>ពុ</div><div>ព្រ</div><div>សុ</div><div>ស</div>
+              </div>
+              <div class="days-grid" style="font-size:12px;">
+                <div class="day-cell empty"></div><div class="day-cell empty"></div>
+                <div class="day-cell empty"></div><div class="day-cell empty"></div>
+                <div class="day-cell today selected">១</div>
+                <div class="day-cell">២</div><div class="day-cell">៣</div>
+                <div class="day-cell">៤</div><div class="day-cell">៥</div>
+                <div class="day-cell">៦</div><div class="day-cell">៧</div>
+                <div class="day-cell">៨</div><div class="day-cell">៩</div>
+                <div class="day-cell">១០</div><div class="day-cell">១១</div>
+                <div class="day-cell">១២</div><div class="day-cell">១៣</div>
+                <div class="day-cell">១៤</div><div class="day-cell">១៥</div>
+                <div class="day-cell">១៦</div>
+              </div>
+              <div class="card" style="margin-top:12px;">
+                <div class="card-label">Selection Binding</div>
+                <div style="font-family:monospace;font-size:11px;color:#5856d6;">$selectedDate → May 1, 2026</div>
+              </div>
+            </div>
+            <div class="tab-bar">
+              <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-name">Home</span></div>
+              <div class="tab-item"><span class="tab-icon">📅</span><span class="tab-name">Formatter</span></div>
+              <div class="tab-item active"><span class="tab-icon">🗓</span><span class="tab-name">Calendar</span></div>
+              <div class="tab-item"><span class="tab-icon">🌙</span><span class="tab-name">Lunar</span></div>
+              <div class="tab-item"><span class="tab-icon">⚙️</span><span class="tab-name">Settings</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- .dateAndTime mode -->
+        <div>
+          <div style="text-align:center;font-size:13px;color:#a78bfa;margin-bottom:10px;font-weight:600;">Mode: .dateAndTime</div>
+          <div class="phone" style="min-height:640px;">
+            <div class="notch"></div>
+            <div class="status-bar"><span>9:41</span><span>●●●</span><span>100%</span></div>
+            <div class="nav-bar"><div class="nav-title">Date Picker</div></div>
+            <div class="screen-content">
+              <div class="seg-control">
+                <div class="seg-item">Date</div>
+                <div class="seg-item">Time</div>
+                <div class="seg-item active">Both</div>
+              </div>
+              <div class="cal-header">
+                <button class="cal-nav-btn">‹</button>
+                <div class="cal-month-title">ឧសភា ២០២៦</div>
+                <button class="cal-nav-btn">›</button>
+              </div>
+              <div class="weekday-row" style="font-size:11px;">
+                <div>អា</div><div>ចន្ទ</div><div>អង</div><div>ពុ</div><div>ព្រ</div><div>សុ</div><div>ស</div>
+              </div>
+              <div class="days-grid" style="font-size:12px;">
+                <div class="day-cell empty"></div><div class="day-cell empty"></div>
+                <div class="day-cell empty"></div><div class="day-cell empty"></div>
+                <div class="day-cell today selected">១</div>
+                <div class="day-cell">២</div><div class="day-cell">៣</div>
+                <div class="day-cell">៤</div><div class="day-cell">៥</div>
+                <div class="day-cell">៦</div><div class="day-cell">៧</div>
+                <div class="day-cell">៨</div>
+              </div>
+              <!-- time wheel -->
+              <div style="border-top:1px solid rgba(0,0,0,.08);margin-top:8px;padding-top:4px;">
+                <div class="wheel-container">
+                  <div class="wheel">
+                    <div class="wheel-label">ម៉ោង</div>
+                    <div class="wheel-items">
+                      <div class="wheel-item">៧</div>
+                      <div class="wheel-item near">៨</div>
+                      <div class="wheel-item selected">៩</div>
+                      <div class="wheel-item near">១០</div>
+                      <div class="wheel-item">១១</div>
+                    </div>
+                  </div>
+                  <div class="wheel-sep">:</div>
+                  <div class="wheel">
+                    <div class="wheel-label">នាទី</div>
+                    <div class="wheel-items">
+                      <div class="wheel-item">៣៩</div>
+                      <div class="wheel-item near">៤០</div>
+                      <div class="wheel-item selected">៤១</div>
+                      <div class="wheel-item near">៤២</div>
+                      <div class="wheel-item">៤៣</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="margin-top:8px;">
+                <div class="card-label">Selection Binding</div>
+                <div style="font-family:monospace;font-size:11px;color:#5856d6;">$selectedDate → May 1, 09:41</div>
+              </div>
+            </div>
+            <div class="tab-bar">
+              <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-name">Home</span></div>
+              <div class="tab-item"><span class="tab-icon">📅</span><span class="tab-name">Formatter</span></div>
+              <div class="tab-item active"><span class="tab-icon">🗓</span><span class="tab-name">Calendar</span></div>
+              <div class="tab-item"><span class="tab-icon">🌙</span><span class="tab-name">Lunar</span></div>
+              <div class="tab-item"><span class="tab-icon">⚙️</span><span class="tab-name">Settings</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="slide-note">Picker tab: segment switches between .date / .time / .dateAndTime. Khmer wheel numerals spin for hours & minutes.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5 : Lunar Calendar ──────────────────────────────── -->
+  <div class="slide">
+    <div class="slide-label">Screen 5 of 6</div>
+    <div class="slide-title">Lunar Tab — KhmerLunarCalendar</div>
+    <div class="slide-center">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●●</span><span>100%</span></div>
+        <div class="nav-bar"><div class="nav-title">Lunar Calendar</div></div>
+        <div class="screen-content">
+
+          <div class="card" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#e2d9f3;">
+            <div style="font-size:11px;color:#a78bfa;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Today's Lunar Date</div>
+            <div style="font-size:22px;font-weight:700;margin-bottom:4px;">ថ្ងៃ ៤កើត ខែ​វិសាខ</div>
+            <div style="font-size:14px;color:#c4b5fd;">ឆ្នាំ​ម្សាញ់ ២៥៦៩</div>
+            <div style="margin-top:8px;font-size:12px;color:#a78bfa;">
+              Waxing Day 4 · Visakha · Year of the Snake · 2569 BE
+            </div>
+          </div>
+
+          <div class="section-header">Lookup Any Date</div>
+          <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:15px;">May 1, 2026</span>
+            <span style="color:#007aff;font-size:13px;">Change ›</span>
+          </div>
+
+          <div class="section-header">Lunar Details</div>
+          <div class="card" style="padding:0">
+            <div class="list-row" style="padding:11px 12px">
+              <span>Lunar Day</span>
+              <span class="badge purple">៤ (Day 4)</span>
+            </div>
+            <div class="list-row" style="padding:11px 12px">
+              <span>Phase</span>
+              <span class="badge blue">កើត (Waxing)</span>
+            </div>
+            <div class="list-row" style="padding:11px 12px">
+              <span>Lunar Month</span>
+              <span class="badge green">ខែ​វិសាខ</span>
+            </div>
+            <div class="list-row" style="padding:11px 12px">
+              <span>Buddhist Year</span>
+              <span class="badge orange">២៥៦៩ BE</span>
+            </div>
+          </div>
+
+          <div class="section-header">Zodiac Year</div>
+          <div class="zodiac-grid">
+            <div class="zodiac-cell"><span class="zodiac-emoji">🐭</span><span class="zodiac-name">ជូត</span></div>
+            <div class="zodiac-cell"><span class="zodiac-emoji">🐮</span><span class="zodiac-name">ឆ្លូវ</span></div>
+            <div class="zodiac-cell"><span class="zodiac-emoji">🐯</span><span class="zodiac-name">ខាល</span></div>
+            <div class="zodiac-cell"><span class="zodiac-emoji">🐰</span><span class="zodiac-name">ថោះ</span></div>
+            <div class="zodiac-cell"><span class="zodiac-emoji">🐉</span><span class="zodiac-name">រោង</span></div>
+            <div class="zodiac-cell active"><span class="zodiac-emoji">🐍</span><span class="zodiac-name">ម្សាញ់</span></div>
+            <div class="zodiac-cell"><span class="zodiac-emoji">🐴</span><span class="zodiac-name">មមី</span></div>
+            <div class="zodiac-cell"><span class="zodiac-emoji">🐐</span><span class="zodiac-name">មមែ</span></div>
+          </div>
+
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-name">Home</span></div>
+          <div class="tab-item"><span class="tab-icon">📅</span><span class="tab-name">Formatter</span></div>
+          <div class="tab-item"><span class="tab-icon">🗓</span><span class="tab-name">Calendar</span></div>
+          <div class="tab-item active"><span class="tab-icon">🌙</span><span class="tab-name">Lunar</span></div>
+          <div class="tab-item"><span class="tab-icon">⚙️</span><span class="tab-name">Settings</span></div>
+        </div>
+      </div>
+      <div class="slide-note">Lunar tab: dark hero card shows today's Chhankitek date. Lookup field converts any Gregorian date. Zodiac grid highlights the current year.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6 : Settings ─────────────────────────────────────── -->
+  <div class="slide">
+    <div class="slide-label">Screen 6 of 6</div>
+    <div class="slide-title">Settings — Locale, Era & Numeral Preview</div>
+    <div class="slide-center">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●●</span><span>100%</span></div>
+        <div class="nav-large-title">Settings</div>
+        <div class="screen-content">
+
+          <div class="section-header">Display Language</div>
+          <div class="card" style="padding:0">
+            <div class="toggle-row" style="padding:11px 12px">
+              <span>Khmer Locale (ភាសាខ្មែរ)</span>
+              <div class="toggle"></div>
+            </div>
+          </div>
+
+          <div class="section-header">Calendar Era</div>
+          <div class="seg-control">
+            <div class="seg-item active">CE (Christian)</div>
+            <div class="seg-item">BE (Buddhist)</div>
+          </div>
+
+          <div class="section-header">First Day of Week</div>
+          <div class="seg-control">
+            <div class="seg-item active">Sunday</div>
+            <div class="seg-item">Monday</div>
+          </div>
+
+          <div class="section-header">Numeral Preview</div>
+          <div class="card">
+            <div class="card-label">Arabic → Khmer</div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px;">
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">0</div><div style="font-size:18px;font-weight:600;color:#5856d6;">០</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">1</div><div style="font-size:18px;font-weight:600;color:#5856d6;">១</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">2</div><div style="font-size:18px;font-weight:600;color:#5856d6;">២</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">3</div><div style="font-size:18px;font-weight:600;color:#5856d6;">៣</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">4</div><div style="font-size:18px;font-weight:600;color:#5856d6;">៤</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">5</div><div style="font-size:18px;font-weight:600;color:#5856d6;">៥</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">6</div><div style="font-size:18px;font-weight:600;color:#5856d6;">៦</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">7</div><div style="font-size:18px;font-weight:600;color:#5856d6;">៧</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">8</div><div style="font-size:18px;font-weight:600;color:#5856d6;">៨</div></div>
+              <div style="text-align:center;"><div style="font-size:12px;color:#8e8e93;">9</div><div style="font-size:18px;font-weight:600;color:#5856d6;">៩</div></div>
+            </div>
+          </div>
+
+          <div class="section-header">About</div>
+          <div class="card" style="padding:0">
+            <div class="list-row" style="padding:11px 12px">
+              <span>Package Version</span>
+              <span style="color:#8e8e93;">1.0.0</span>
+            </div>
+            <div class="list-row" style="padding:11px 12px">
+              <span>iOS</span>
+              <span style="color:#8e8e93;">14.0+</span>
+            </div>
+            <div class="list-row" style="padding:11px 12px">
+              <span>Swift</span>
+              <span style="color:#8e8e93;">5.9+</span>
+            </div>
+          </div>
+
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><span class="tab-icon">🏠</span><span class="tab-name">Home</span></div>
+          <div class="tab-item"><span class="tab-icon">📅</span><span class="tab-name">Formatter</span></div>
+          <div class="tab-item"><span class="tab-icon">🗓</span><span class="tab-name">Calendar</span></div>
+          <div class="tab-item"><span class="tab-icon">🌙</span><span class="tab-name">Lunar</span></div>
+          <div class="tab-item active"><span class="tab-icon">⚙️</span><span class="tab-name">Settings</span></div>
+        </div>
+      </div>
+      <div class="slide-note">Settings tab: toggle locale, era, and first-weekday. Numeral grid shows Arabic-to-Khmer mapping. Package metadata at bottom.</div>
+    </div>
+  </div>
+
+</div><!-- /.slide-show -->
+
+</body>
+</html>
