@@ -2,6 +2,7 @@ import SwiftUI
 import KhmerCalendarKit
 
 struct FormatterView: View {
+    @Binding var showSettings: Bool
     @State private var date = Date()
     @State private var includesWeekday = true
     @State private var includesDay     = true
@@ -64,6 +65,13 @@ struct FormatterView: View {
                 }
             }
             .navigationTitle("Formatter")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
         }
     }
 

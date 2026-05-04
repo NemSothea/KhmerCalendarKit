@@ -3,6 +3,7 @@ import KhmerCalendarKit
 
 struct HomeView: View {
     @Binding var selectedTab: Int
+    @Binding var showSettings: Bool
     @State private var today = Date()
 
     var body: some View {
@@ -17,6 +18,13 @@ struct HomeView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("KhmerCalendarKit")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
             .onAppear { today = Date() }
         }
     }
@@ -67,7 +75,7 @@ struct HomeView: View {
             Divider().padding(.leading, 42)
             FeatureRow(icon: "moon.stars.fill",  title: "Lunar",       subtitle: "Chhankitek · Zodiac · Phase")   { selectedTab = 4 }
             Divider().padding(.leading, 42)
-            FeatureRow(icon: "gearshape",        title: "Settings",    subtitle: "Locale · Era · Numerals")       { selectedTab = 5 }
+            FeatureRow(icon: "gearshape",        title: "Settings",    subtitle: "Locale · Era · Numerals")       { showSettings = true }
         }
         .padding()
         .background(Color(.systemBackground))

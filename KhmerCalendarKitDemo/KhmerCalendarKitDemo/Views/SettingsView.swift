@@ -2,9 +2,10 @@ import SwiftUI
 import KhmerCalendarKit
 
 struct SettingsView: View {
-    @AppStorage("locale")      private var localeRaw:      Int = 0
-    @AppStorage("era")         private var eraRaw:         Int = 0
-    @AppStorage("firstWeekday") private var firstWeekday:  Int = 1
+    @AppStorage("locale")       private var localeRaw:    Int = 0
+    @AppStorage("era")          private var eraRaw:       Int = 0
+    @AppStorage("firstWeekday") private var firstWeekday: Int = 1
+    @Environment(\.dismiss)     private var dismiss
 
     private var era: KhmerEra { eraRaw == 1 ? .buddhist : .christian }
 
@@ -69,6 +70,12 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .fontWeight(.semibold)
+                }
+            }
         }
     }
 }

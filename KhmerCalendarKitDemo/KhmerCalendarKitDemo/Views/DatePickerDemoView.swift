@@ -2,6 +2,7 @@ import SwiftUI
 import KhmerCalendarKit
 
 struct DatePickerDemoView: View {
+    @Binding var showSettings: Bool
     @State private var selectedDate = Date()
     @State private var modeIndex    = 0
     @AppStorage("locale")       private var localeRaw:    Int = 0
@@ -35,8 +36,6 @@ struct DatePickerDemoView: View {
                         locale: locale,
                         firstWeekday: firstWeekday
                     )
-                    // Recreate when locale, firstWeekday, or mode changes so the
-                    // internal ObservedObject ViewModel is re-initialized.
                     .id("\(localeRaw)-\(firstWeekday)-\(modeIndex)")
                     .padding()
                     .background(Color(.systemBackground))
@@ -50,6 +49,13 @@ struct DatePickerDemoView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Date Picker")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
         }
     }
 

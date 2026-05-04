@@ -2,6 +2,7 @@ import SwiftUI
 import KhmerCalendarKit
 
 struct LunarView: View {
+    @Binding var showSettings: Bool
     @State private var lookupDate = Date()
 
     private var lunar: KhmerLunarDate { lookupDate.toKhmerLunar() }
@@ -19,6 +20,13 @@ struct LunarView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Lunar Calendar")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
         }
     }
 

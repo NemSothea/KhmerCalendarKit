@@ -2,6 +2,7 @@ import SwiftUI
 import KhmerCalendarKit
 
 struct CalendarDemoView: View {
+    @Binding var showSettings: Bool
     @State private var selectedDate = Date()
     @AppStorage("locale")       private var localeRaw:    Int = 0
     @AppStorage("firstWeekday") private var firstWeekday: Int = 1
@@ -24,8 +25,6 @@ struct CalendarDemoView: View {
                         locale: locale,
                         firstWeekday: firstWeekday
                     )
-                    // Recreate when locale or firstWeekday changes so the
-                    // internal ObservedObject ViewModel is re-initialized.
                     .id("\(localeRaw)-\(firstWeekday)")
                     .padding()
                     .background(Color(.systemBackground))
@@ -52,6 +51,13 @@ struct CalendarDemoView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Calendar")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
         }
     }
 }
