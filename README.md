@@ -10,8 +10,29 @@ A Swift Package for working with the Khmer calendar system — Gregorian date fo
 
 ---
 
+## Preview
+
+<p align="center">
+  <img src="Screenshots/demo.gif" width="260" alt="KhmerCalendarKit Demo" />
+</p>
+
+<p align="center">
+  <img src="Screenshots/01_home.png"      width="18.5%" alt="Home" />
+  <img src="Screenshots/02_formatter.png" width="18.5%" alt="Formatter" />
+  <img src="Screenshots/03_calendar.png"  width="18.5%" alt="Calendar" />
+  <img src="Screenshots/04_picker.png"    width="18.5%" alt="Date Picker" />
+  <img src="Screenshots/05_lunar.png"     width="18.5%" alt="Lunar" />
+</p>
+
+<p align="center">
+  <sub>Home &nbsp;·&nbsp; Formatter &nbsp;·&nbsp; Calendar &nbsp;·&nbsp; Date Picker &nbsp;·&nbsp; Lunar</sub>
+</p>
+
+---
+
 ## Table of Contents
 
+- [Preview](#preview)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -323,6 +344,15 @@ Data flows in one direction: `KhmerLocale` → `KhmerCalendarViewModel` → View
 ## Demo App
 
 A fully functional demo app is included at [`KhmerCalendarKitDemo/`](KhmerCalendarKitDemo/). Open the Xcode project to run it on the iOS Simulator or a device.
+
+<p align="center">
+  <img src="Screenshots/01_home.png"      width="16%" alt="Home" />
+  <img src="Screenshots/02_formatter.png" width="16%" alt="Formatter" />
+  <img src="Screenshots/03_calendar.png"  width="16%" alt="Calendar" />
+  <img src="Screenshots/04_picker.png"    width="16%" alt="Date Picker" />
+  <img src="Screenshots/05_lunar.png"     width="16%" alt="Lunar" />
+  <img src="Screenshots/06_settings.png"  width="16%" alt="Settings" />
+</p>
 
 | Screen | Demonstrates |
 |---|---|
